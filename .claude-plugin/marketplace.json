@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "skill-driven-development",
+  "description": "Skill-first development for Claude Code.",
+  "owner": {
+    "name": "Jan Všetíček",
+    "url": "https://github.com/Malvi1697"
+  },
+  "plugins": [
+    {
+      "name": "skill-driven-development",
+      "description": "Skill-first development: no file is changed unless a project skill for that kind of work exists and is in use.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
