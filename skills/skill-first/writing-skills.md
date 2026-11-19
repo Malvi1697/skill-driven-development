@@ -32,6 +32,19 @@ get past the rule. Name the actual kind of work instead.
 The description is all that is visible before the skill is invoked. If it
 does not say when the skill applies, the skill will not be found.
 
+## Limiting a skill to some files
+
+A skill unlocks every file in the repository once it is invoked. If the work
+is tied to particular files, say so, and the skill will unlock only those:
+
+    metadata:
+      covers: db/migrations/**, db/schema.sql
+
+`covers` is a comma-separated list of glob patterns relative to the
+repository root. `*` and `**` match across directories, and a directory name
+covers everything below it. Leave it out when the kind of work is not tied
+to particular files, such as "fixing a bug".
+
 ## A skill is a signpost
 
 `SKILL.md` is read in full every time the skill is invoked, so keep it short:

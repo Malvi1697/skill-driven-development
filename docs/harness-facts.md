@@ -20,6 +20,22 @@ input from a headless session, unless marked "from the docs".
    hook that adds skill directories should return `reloadSkills: true`. The
    hook does that whenever it creates `.claude/skills/`.
 
+5. **Shell commands.** `PostToolUse` fires after a Bash call that exited
+   normally and `PostToolUseFailure` after one that failed; both carry the
+   same `tool_use_id` as the `PreToolUse` event for that call (from the
+   docs). Observed: a file changed through `tee` with no skill in use was
+   recorded by the hook after the command, and the `Stop` hook then held
+   the turn back with the list of changed files. From the docs:
+   `PostToolUse` can return `decision: "block"` with a `reason`, which is
+   added next to the tool result; `PostToolUseFailure` can only return
+   `additionalContext`.
+6. **Skill listing budget.** From the docs: skill descriptions share a
+   budget of 1% of the model's context window; when it overflows, the
+   descriptions of the least-invoked skills are dropped.
+7. **Skills invoked by the user.** From the docs, not observed: typing
+   `/skill-name` does not fire `PreToolUse` for the `Skill` tool; it fires
+   `UserPromptExpansion` with the name in `command_name`.
+
 One more fact that shapes how the plugin feels in use, from the docs and
 observed: `.claude/` is a protected path. Writes to `.claude/skills/` are
 prompted in the `default` and `acceptEdits` permission modes even when an

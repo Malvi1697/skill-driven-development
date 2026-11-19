@@ -2,6 +2,27 @@
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.0] - 2026-11-19
+
+### Changed
+
+- Shell commands are no longer refused for what their text looks like. The
+  repository is compared before and after each command. Changes with no
+  skill covering them are reported to Claude and hold back commit, push and
+  the end of the turn until a skill is invoked or the change is undone.
+  This catches formatters, package managers and scripts, and ends refusals
+  of harmless commands such as a redirect into a temporary directory.
+
+### Added
+
+- `metadata.covers` in a skill's frontmatter limits the skill to the files
+  matching its glob patterns.
+- `python3 hooks/sdd_core.py lint [directory]` checks that every project
+  skill is complete, for use in a pre-commit hook or in CI.
+- Skills in a git-ignored nested `.claude/skills/` are found when the
+  session works in or below that directory.
+- Session files older than 30 days are removed at session start.
+
 ## [0.1.0] - 2026-11-19
 
 ### Added

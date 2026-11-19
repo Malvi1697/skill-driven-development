@@ -1,6 +1,6 @@
 {
   "name": "skill-driven-development",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Skill-first development: no file is changed unless a project skill for that kind of work exists and is in use.",
   "author": {
     "name": "Jan Všetíček",

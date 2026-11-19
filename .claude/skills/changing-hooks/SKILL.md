@@ -17,7 +17,9 @@ behaviour.
 - Python 3 standard library only.
 - Gates fail closed: an error in a `PreToolUse` path must refuse the tool
   call with a message, never let it through.
-- Reading must stay free: a read-only shell command must never be refused.
+- Reading must stay free. No shell command is refused except `git commit`
+  and `git push`; what a command wrote is judged after it ran, by comparing
+  repository snapshots.
 - Writes under `.claude/skills/` through the file tools are always allowed.
 - Outside a git repository the hooks do nothing and create nothing.
 - Messages shown to Claude are constants at the top of `hooks/sdd.py`. Tests
@@ -38,8 +40,8 @@ claude plugin validate .
    - Reading the event and answering it goes in `hooks/sdd.py`, tested in
      `tests/test_hooks.py` by running the script with JSON on stdin.
 2. Make it pass with the smallest change.
-3. For a new shell write pattern, add the command to `WRITES` in
-   `tests/test_core_bash.py` and a look-alike read-only command to `READS`.
+3. For a change to how commit and push are recognised, add the command to
+   `tests/test_core_bash.py`, together with a look-alike that must not match.
 4. If the change depends on a hook's input or output format, check it
    against a running Claude Code and record what you saw in
    `docs/harness-facts.md`. The documentation alone is not enough.
@@ -53,5 +55,11 @@ claude plugin validate .
   session's id.
 - Project roots and paths are compared after resolving symlinks. Compare
   resolved paths in tests too.
+- Snapshots compare modification time and size of the files git lists as
+  changed or untracked. In a test, change a file's size, not just its
+  content, so the difference is seen whatever the clock resolution.
+- `hooks/sdd_core.py` must keep working as a single file with no imports
+  from the rest of the plugin; people copy it into their projects to run
+  the skill check.
 - Headless Claude Code cannot write under `.claude/`, so an end-to-end check
   that creates a skill has to be done in an interactive session.

@@ -3,7 +3,8 @@ import tempfile
 import unittest
 
 from helpers import VALID, RepoTestCase, join, write
-from sdd_core import find_skill, in_skills_dir, lint_skill, list_skills, project_root
+from sdd_core import (covers, find_skill, in_skills_dir, lint_skill, list_skills, parse_frontmatter,
+                      path_matches, project_root)
 
 
 class ProjectRootTest(RepoTestCase):
@@ -75,12 +76,55 @@ class SkillDiscoveryTest(RepoTestCase):
         self.assertEqual(list_skills(self.repo), [join(self.repo, ".claude/skills/api")])
         self.assertEqual(find_skill(self.repo, "api"), join(self.repo, ".claude/skills/api"))
 
+    def test_ignored_nested_skill_is_found_near_the_working_directory(self):
+        write(self.repo, ".gitignore", ".claude/\n")
+        write(self.repo, "pkg/.claude/skills/ui/SKILL.md", VALID)
+        self.assertEqual(list_skills(self.repo), [])
+        near = join(self.repo, "pkg/src/deep")
+        self.assertEqual(list_skills(self.repo, near), [join(self.repo, "pkg/.claude/skills/ui")])
+        self.assertEqual(find_skill(self.repo, "ui", near), join(self.repo, "pkg/.claude/skills/ui"))
+
     def test_find_skill(self):
         write(self.repo, ".claude/skills/api/SKILL.md", VALID)
         self.assertEqual(find_skill(self.repo, "api"), join(self.repo, ".claude/skills/api"))
         self.assertEqual(find_skill(self.repo, "/api"), join(self.repo, ".claude/skills/api"))
         self.assertIsNone(find_skill(self.repo, "other"))
         self.assertIsNone(find_skill(self.repo, "plugin:api"))
+
+
+class CoversTest(RepoTestCase):
+    def skill(self, frontmatter_extra):
+        write(self.repo, ".claude/skills/api/SKILL.md",
+              "---\nname: api\ndescription: Use when changing the API.\n" + frontmatter_extra + "---\n")
+        return join(self.repo, ".claude/skills/api")
+
+    def test_no_metadata_means_no_restriction(self):
+        self.assertIsNone(covers(self.skill("")))
+
+    def test_comma_separated(self):
+        self.assertEqual(covers(self.skill("metadata:\n  covers: src/api/**, tests/api/**\n")),
+                         ["src/api/**", "tests/api/**"])
+
+    def test_inline_list_and_quotes(self):
+        self.assertEqual(covers(self.skill('metadata:\n  covers: ["docs/**", "*.md"]\n')), ["docs/**", "*.md"])
+
+    def test_other_metadata_keys_do_not_restrict(self):
+        self.assertIsNone(covers(self.skill("metadata:\n  owner: team-a\n")))
+
+    def test_nested_keys_do_not_leak_into_description(self):
+        fm = parse_frontmatter("---\nname: a\ndescription: >\n  Use when x. Note the word\n  covers: nothing here.\n---\n")
+        self.assertIn("covers: nothing here.", fm["description"])
+        self.assertNotIn("description.covers", fm)
+
+    def test_path_matches(self):
+        self.assertTrue(path_matches("src/api/v1/users.py", ["src/api/**"]))
+        self.assertTrue(path_matches("README.md", ["*.md"]))
+        self.assertTrue(path_matches("docs/guide/intro.md", ["*.md"]))
+        self.assertTrue(path_matches("src/api", ["src/api"]))
+        self.assertTrue(path_matches("src/api/a.py", ["src/api"]))
+        self.assertFalse(path_matches("src/apiary/a.py", ["src/api"]))
+        self.assertFalse(path_matches("src/web/a.py", ["src/api/**", "docs/**"]))
+        self.assertFalse(path_matches("a.py", []))
 
 
 class LintTest(RepoTestCase):

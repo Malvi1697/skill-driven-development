@@ -20,17 +20,6 @@
         ]
       }
     ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/sdd.py\""
-          }
-        ],
-        "matcher": "Skill"
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|NotebookEdit|Bash",
@@ -40,6 +29,28 @@
             "command": "command -v python3 >/dev/null 2>&1 || { echo \"Skill-Driven Development: python3 is required, so the change is blocked.\" >&2; exit 2; }; python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/sdd.py\" || exit 2"
           }
         ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/sdd.py\""
+          }
+        ],
+        "matcher": "Skill|Bash"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/sdd.py\""
+          }
+        ],
+        "matcher": "Bash"
       }
     ],
     "Stop": [

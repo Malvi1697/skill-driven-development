@@ -46,9 +46,13 @@ too. Reading, searching and answering questions need no skill.
   run `/reload-skills`, then invoke it again.
 - **After the conversation is compacted,** invoke the skills you were using
   again; their text may no longer be in context.
-- **A shell command is refused.** Commands that write files are held to the
-  same rule as the file tools. Invoke the skill first. Create and edit skill
-  files with the file tools, not the shell.
+- **A shell command changed files and you are told no skill covers them.**
+  Shell commands are checked by what they changed, after they ran. Invoke
+  the skill for that work, then check the changes against it, or undo them.
+  Until then, commit, push and the end of the turn are held back.
+- **A file is "not covered by the skills in use".** The skills you invoked
+  declare which files they cover and this file is not among them. Invoke the
+  skill for this kind of work, or create one.
 
 ## Which file to open
 
